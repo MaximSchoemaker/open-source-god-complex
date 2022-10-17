@@ -1,0 +1,24 @@
+{
+   "kind": "page",
+   "title": "Homepage",
+   "childElements": [
+      {
+         "kind": "section",
+         "attributes": {
+            "id": "section"
+         },
+         "childElements": [
+            {
+               "kind": "header"
+            },
+            {
+               "kind": "grid",
+               "data": "images",
+               "element": {
+                  "kind": "image"
+               }
+            }
+         ]
+      }
+   ]
+}

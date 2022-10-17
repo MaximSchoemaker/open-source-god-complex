@@ -1,0 +1,26 @@
+{
+   "kind": "div",
+   "attributes": {
+      "id": "header"
+   },
+   "childElements": [
+      {
+         "kind": "a",
+         "content": "Home",
+         "attributes": {
+            "id": "home",
+            "class": "header-button",
+            "href": "/"
+         }
+      },
+      {
+         "kind": "a",
+         "content": "About",
+         "attributes": {
+            "id": "about",
+            "class": "header-button",
+            "href": "/about"
+         }
+      }
+   ]
+}

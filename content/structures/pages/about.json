@@ -1,0 +1,17 @@
+{
+   "kind": "page",
+   "title": "About",
+   "childElements": [
+      {
+         "kind": "section",
+         "attributes": {
+            "id": "section"
+         },
+         "childElements": [
+            {
+               "kind": "header"
+            }
+         ]
+      }
+   ]
+}
