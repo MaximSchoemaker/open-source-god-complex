@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "compile": "node ./scripts/compile.js",
-    "start": "astro dev",
+    "start": "astro dev --host",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -14,5 +14,8 @@
     "@astrojs/solid-js": "^1.2.0",
     "astro": "^1.5.0",
     "solid-js": "^1.5.7"
+  },
+  "devDependencies": {
+    "os-utils": "^0.0.14"
   }
 }

@@ -13,6 +13,13 @@
             },
             {
                "kind": "grid",
+               "data": "videos",
+               "element": {
+                  "kind": "image"
+               }
+            },
+            {
+               "kind": "grid",
                "data": "images",
                "element": {
                   "kind": "image"
