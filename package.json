@@ -5,6 +5,8 @@
   "private": true,
   "scripts": {
     "compile": "node ./scripts/compile.js",
+    "import": "node ./scripts/import.js",
+    "crawl": "node ./scripts/crawl.js",
     "start": "astro dev --host",
     "build": "astro build",
     "preview": "astro preview",

@@ -1,153 +1,165 @@
-// const fs = require('fs');
-// const PATH = require('path');
-import fs from 'fs';
 import PATH from 'path';
-import { spawn } from "child_process";
 
-let id_counter = 0;
+import Crawl from "./crawl.js";
+import Import from "./import.js";
+import { ask, formatBytes } from "./utils.js";
 
-const WIDTH = 100;
-const HEIGHT = 100;
 
-function CompileContent(rootPath) {
-   compile(rootPath);
-   function compile(path) {
-      // console.log(path);
+await Compile();
+console.log("COMPILATION DONE!")
 
-      const lstat = fs.lstatSync(path);
-      if (lstat.isDirectory()) {
-         const files = fs.readdirSync(path, { encoding: 'utf8', withFileTypes: true });
-         files.forEach(file => {
-            const { name } = file;
-            let subDir = PATH.join(path, name);
-            try {
-
-               if (file.isSymbolicLink()) {
-                  const link = fs.readlinkSync(subDir);
-                  subDir = fs.realpathSync(link);
-                  CompileContent(subDir);
-               } else {
-                  compile(subDir);
-               }
-            } catch (error) {
-               console.error("ERROR:", subDir);
-            }
-         });
-         return;
-      }
-
-      const extension = PATH.extname(path);
-      const filename = PATH.basename(path, extension);
-
-      const { mtime } = lstat;
-      const fileData = {
-         id: id_counter++,
-         filename,
-         path,
-         extension,
-         mtime,
-         // lstate,
-      }
-      switch (extension) {
-         case ".json":
-            structures.push(fileData);
-            break;
-         case ".png":
-         case ".jpg":
-            const srcPath = PATH.dirname(path)
-               .replace(rootPath, "compiled");
-            // .replace("content\\\\", "compiled")
-            // .replace("C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\rendr", "compiled");
-            const src = PATH.join(srcPath, `${filename} ${WIDTH}x${HEIGHT}${extension}`);
-            images.push({ ...fileData, src });
-            break;
-      }
+async function Compile() {
+   {
+      const import_path = "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\rendr";
+      const import_target_dir = "public\\compiled\\rendr"
+      const import_width = 1080;
+      const import_height = 1080;
+      const import_override = false;
+      const imported_items = await runImport(import_path, import_target_dir, import_width, import_height, import_override);
+      console.log({ imported_items }, "\n");
    }
-}
-
-
-function generateImports(contents, kind) {
-   let importsLine, dataLine, exportLine;
-
-   if (kind) {
-      importsLine = contents.map((content, i) => {
-         const { id, path } = content;
-         return `import ${kind}_${id} from "../../${content.path.replaceAll("\\", "\/")}"`;
-      }).join("\n");
-
-      dataLine = `const data = [${contents.map((meta) => `{ ${kind}: ${kind}_${meta.id}, meta: ${JSON.stringify(meta)} }`).join(", ")}]`
-   } else {
-      dataLine = `const data = [${contents.map((meta) => JSON.stringify(meta)).join(", ")}]`
+   {
+      const import_path = "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\JS Projects\\graphics\\screenshots";
+      const import_target_dir = "public\\compiled\\graphics_screenshots"
+      const import_width = 1080;
+      const import_height = 1080;
+      const import_override = false;
+      const imported_items = await runImport(import_path, import_target_dir, import_width, import_height, import_override);
+      console.log({ imported_items }, "\n");
+   }
+   {
+      const import_path = "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\JS Projects\\graphics\\videos";
+      const import_target_dir = "public\\compiled\\graphics_videos"
+      const import_width = 1080;
+      const import_height = 1080;
+      const import_override = false;
+      const imported_items = await runImport(import_path, import_target_dir, import_width, import_height, import_override);
+      console.log({ imported_items }, "\n");
    }
 
-   exportLine = "export default data";
-
-   const file = [importsLine, dataLine, exportLine].join("\n");
-   return file;
+   const meta_path = "public\\compiled";
+   const meta_sizes = [
+      { width: 512, height: 512 },
+      { width: 256, height: 256 },
+      { width: 128, height: 128 },
+      { width: 64, height: 64 },
+      { width: 32, height: 32 },
+      { width: 16, height: 16 },
+      { width: 8, height: 8 },
+      { width: 4, height: 4 },
+      { width: 2, height: 2 },
+   ]
+   const meta_override = false;
+   const metaed_items = await runMeta(meta_path, meta_sizes, meta_override);
+   console.log({ metaed_items }, "\n");
 }
 
-// var spawn = require('child_process').spawn;
-var cmd = 'C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe';
+async function runImport(path, target_dir, width, height, override) {
+   const items = await Crawl(
+      path,
+      { properties: { isDir: false, } },
+      { ignore: ["\\swarm\\session", "\\flock\\"] }
+   );
 
-function copyContents(contents, toDir) {
-   contents.forEach((content, i) => {
-      const toPath = PATH.join("public", content.src);
-      const toDir = PATH.dirname(toPath);
-      if (!fs.existsSync(toDir)) {
-         console.log(">>create dir:", toDir, "\n");
-         fs.mkdirSync(toDir, { recursive: true });
-      }
+   // items.sort((i1, i2) => i1.metadata.size - i2.metadata.size);
 
-      let copy = !fs.existsSync(toPath);
-      if (!copy) {
-         const dateFrom = new Date(content.mtime);
-         const dateTo = new Date(fs.lstatSync(toPath).mtime);
-         copy = dateFrom > dateTo;
-      }
+   // console.log({ items });
+   console.log("total items:", items.length);
 
-      if (copy) {
-         console.log(">>copy file", "(", i, "/", contents.length, ")", "\nfrom:", content.path, "\nto:", toPath, "\n");
-         // fs.copyFileSync(content.path, toPath);
+   if (await ask("import? y/n: ") != "y")
+      return;
 
-         var args = [
-            // '-y',
-            '-i', content.path,
-            // '-s', `${WIDTH}x${HEIGHT}`,
-            // "-vf", `scale=-1:${HEIGHT}`,
-            "-vf", `scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=increase`,
-            // "-vf", `scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=decrease,pad=${WIDTH}:${HEIGHT}:(ow-iw)/2:(oh-ih)/2`,
-            toPath
-         ];
-
-         var proc = spawn(cmd, args);
-
-         proc.stdout.on('data', function (data) {
-            // console.log(data);
-         });
-
-         proc.stderr.setEncoding("utf8")
-         proc.stderr.on('data', function (data) {
-            // console.log(data);
-         });
-
-         proc.on('close', function () {
-            // console.log('finished');
-         });
-
-      }
-   });
+   return await Import(items, [
+      {
+         profile: { properties: { extension: ".mp4" } },
+         action: {
+            kind: "copy",
+            override,
+            get_target_path: (item) => PATH.join(
+               target_dir,
+               "videos",
+               item.crawl_relative_path
+            ),
+         },
+      },
+      {
+         profile: { properties: { extension: ".png" } },
+         action: {
+            kind: "ffmpeg",
+            override,
+            get_target_path: (item) => PATH.join(
+               target_dir,
+               "images"
+               , item.crawl_relative_dir,
+               `${item.filename} ${width}x${height}.jpg`
+            ),
+            get_ffmpeg_args: (path, target_path) => [
+               '-y',
+               "-i", path,
+               "-vf", `scale=${width}:${height}:force_original_aspect_ratio=increase`,
+               target_path
+            ]
+         }
+      },
+   ]);
 }
 
-const structures = [];
-const images = [];
-CompileContent("content");
-CompileContent("C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\rendr");
-CompileContent("C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\JS Projects\\graphics\\screenshots");
 
-const structuresImportsFile = generateImports(structures, "structure");
-fs.writeFileSync("src/compiled/structuresImports.js", structuresImportsFile);
+async function runMeta(path, sizes, override) {
+   const items = await Crawl(
+      path,
+      { properties: { isDir: false } },
+      { ignore: ["\\_meta\\"] },
+   );
 
-const imagesImportsFile = generateImports(images);
-fs.writeFileSync("src/compiled/imagesImports.js", imagesImportsFile);
+   // items.sort((i1, i2) => i1.metadata.size - i2.metadata.size);
 
-copyContents(images, "public/compiled/");
+   items.forEach(i => console.log(`${formatBytes(i.metadata.size)} ${i.filename_with_extension}`));
+   const totalSize = items.reduce((tot, i) => tot + i.metadata.size, 0);
+   console.log({ items: items.length, size: formatBytes(totalSize) });
+   if (await ask("meta? y/n: ") != "y")
+      return;
+
+   const profileActions = [
+      ...sizes.map(({ width, height }) => ({
+         profile: { properties: { extension: ".mp4" } },
+         action: {
+            kind: "ffmpeg",
+            override,
+            get_target_path: (item) => PATH.join(
+               item.directory,
+               "_meta",
+               `${item.filename} ${width}x${height}.gif`
+            ),
+            get_ffmpeg_args: (path, target_path) => [
+               '-y',
+               "-t", "60",
+               "-i", path,
+               "-vf", `fps=50,scale=${width}:${height}:force_original_aspect_ratio=increase:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`,
+               target_path
+            ]
+         }
+      })),
+
+      ...sizes.map(({ width, height }) => ({
+         profile: { properties: { extension: ".jpg" } },
+         action: {
+            kind: "ffmpeg",
+            override,
+            get_target_path: (item) => PATH.join(
+               item.directory,
+               "_meta",
+               `${item.filename} ${width}x${height}.jpg`
+            ),
+            get_ffmpeg_args: (path, target_path) => [
+               '-y',
+               "-i", path,
+               "-vf", `scale=${width}:${height}:force_original_aspect_ratio=increase`,
+               target_path
+            ]
+         }
+      })),
+   ]
+
+   return await Import(items, profileActions);
+}

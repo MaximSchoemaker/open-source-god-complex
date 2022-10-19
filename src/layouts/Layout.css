@@ -1,17 +1,46 @@
+:root {
+   --gap: 25px;
+   --width: 50%;
+   --cols: 1;
+   --size: calc(var(--width) / var(--cols) - var(--gap));
+}
+
+@media (orientation: portrait) {
+   :root {
+      --width: 100%;
+   }
+}
+
+body {
+   margin: 0 var(--gap);
+}
+
 main {
    margin: auto;
    /* padding: 1.5rem; */
-   max-width: 90vw;
+   width: var(--width);
+
+   /* padding-left: 5vw;
+   padding-right: 5vw;
+   width: 100%; */
 
    /* font-family: "Times New Roman", Times, serif; */
 
    padding-top: 100px;
 }
 
+#section {
+   display: flex;
+   flex-direction: column;
+   gap: 25px;
+   width: 100%;
+}
+
 h1 {
    font-size: 3rem;
    font-weight: 800;
    margin: 0;
+   margin-bottom: 15px;
 }
 
 .text-gradient {
@@ -56,15 +85,42 @@ li {
 }
 
 img {
-   max-width: 100%;
    display: block;
-   width: 100px;
-   height: 100px;
+
+   /* min-width: 0;
+   min-height: 0;
+
+   max-width: var(--size);
+   max-height: var(--size);
+
+   width: var(--size);
+   height: var(--size); */
+
+   width: 100%;
+   aspect-ratio: 1 / 1;
+
    object-fit: cover;
+   white-space: pre-wrap;
+   overflow-wrap: break-word;
+
+   overflow: auto;
+}
+
+@media (orientation: portrait) {
+   img {
+      overflow: hidden;
+   }
 }
 
 #Grid {
-   display: flex;
-   flex-wrap: wrap;
-   gap: 5px;
+   /* display: flex;
+   flex-wrap: wrap; */
+
+   display: grid;
+   grid-template-columns: repeat(var(--cols), 1fr);
+
+   gap: var(--gap);
+}
+
+#Grid:hover-inside {
 }
