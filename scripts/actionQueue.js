@@ -1,6 +1,34 @@
 import { cpuUsage } from "./utils.js";
 
-const CPU_TARGET = 0.5;
+const CPU_TARGET = 0.75;
+
+function timeSince(date) {
+
+   var seconds = Math.floor((new Date() - date) / 1000);
+
+   var interval = seconds / 31536000;
+
+   if (interval > 1) {
+      return Math.floor(interval) + " years";
+   }
+   interval = seconds / 2592000;
+   if (interval > 1) {
+      return Math.floor(interval) + " months";
+   }
+   interval = seconds / 86400;
+   if (interval > 1) {
+      return Math.floor(interval) + " days";
+   }
+   interval = seconds / 3600;
+   if (interval > 1) {
+      return Math.floor(interval) + " hours";
+   }
+   interval = seconds / 60;
+   if (interval > 1) {
+      return Math.floor(interval) + " minutes";
+   }
+   return Math.floor(seconds) + " seconds";
+}
 
 export default async function RunQueue(queue, executeAction, actionDone) {
    const running_set = new Set();
@@ -8,6 +36,7 @@ export default async function RunQueue(queue, executeAction, actionDone) {
    let running_inc = 1;
    const count = queue.length;
 
+   const queue_start_time = Date.now();
    let idle_start_time = Date.now(),
       idle_end_time = Date.now();
 
@@ -16,14 +45,21 @@ export default async function RunQueue(queue, executeAction, actionDone) {
    function log_vitals() {
       const idle_time = idle_end_time - idle_start_time;
 
-      console.log({
-         running: running_set.size,
-         max: running_max,
-         queue: queue.length,
-         cpu: cpu_usage,
-         // idle: idle_time,
-      },
-         // "\n"
+      const elapsed = Date.now() - queue_start_time
+      const left = queue.length + running_set.size;
+      const done = count - left;
+      const avg_time_per_item = elapsed / done;
+      const estimate = left * avg_time_per_item;
+
+      // console.log({ elapsed, left, done, avg_time_per_item, estimate });
+      console.log("{",
+         "running:", running_set.size, ",",
+         "max:", running_max, ",",
+         "progress:", "(", done, "/", count, ")", ",",
+         "elapsed:", new Date(elapsed).toISOString().substr(11, 8), ",",
+         "estimate:", done ? new Date(estimate).toISOString().substr(11, 8) : "???", ",",
+         "cpu:", Math.round(cpu_usage * 100) / 100,
+         "}"
       );
    }
 
@@ -60,7 +96,7 @@ export default async function RunQueue(queue, executeAction, actionDone) {
          // running_max = 0;
          running_inc = 1;
       }
-      // running_max = Math.min(10, Math.max(1, Math.round(running_max)));
+      // running_max = Math.min(100, Math.max(1, Math.round(running_max)));
       running_max = Math.max(1, Math.round(running_max));
 
       log_vitals();

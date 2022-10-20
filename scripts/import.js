@@ -4,20 +4,28 @@ import fs from 'fs';
 import Crawl, { checkProfile, generateItem } from "./crawl.js";
 import ffmpeg from "./ffmpeg.js";
 import RunQueue from "./actionQueue.js";
-import { formatBytes, ensureDir, exists } from "./utils.js";
+import { formatBytes, ensureDir, exists, ask } from "./utils.js";
 
 const LOG = true;
 
-async function hasBeenModifiedSinceImport(item, target_path) {
-   const { metadata: { mtime } } = item;
-   const target_mtime = (await fs.promises.lstat(target_path)).mtime;
-   if (target_mtime >= mtime) {
-      LOG && console.log("source has not been modified since import", "\n",
-         "\t", "source mtime:", mtime, "\n",
-         "\t", "target mtime:", target_mtime, "\n",
-      );
+async function needsImporting(item, action, target_path) {
+   const { override } = action;
+   const { metadata: { mtime, size } } = item;
+
+   let target_metadata =
+      await exists(target_path) &&
+      await fs.promises.lstat(target_path);
+
+   const needsImporting =
+      !target_metadata
+      || target_metadata.size == 0
+      || target_metadata.mtime < mtime;
+
+   if (!needsImporting)
       return false;
-   }
+
+   console.log(`${formatBytes(size)} - ${item.filename_with_extension}`)
+   console.log(`   > ${target_metadata ? formatBytes(target_metadata.size) : "X"} - ${PATH.basename(target_path)}`)
    return true;
 }
 
@@ -41,10 +49,10 @@ async function ffmpegItem(item, target_path, args) {
 async function executeAction(item, target_path, action) {
    const { kind, override } = action;
 
-   if (!await exists(target_path))
-      await ensureDir(target_path)
-   else if (!override && !await hasBeenModifiedSinceImport(item, target_path))
-      return false;
+   // if (!await exists(target_path))
+   //    await ensureDir(target_path)
+   // else if (!override && !await hasBeenModifiedSinceImport(item, target_path))
+   //    return false;
 
    switch (kind) {
       case "copy":
@@ -75,9 +83,24 @@ export default async function Import(items, profileActions) {
          const { get_target_path } = action;
          const target_path = get_target_path(item);
 
+         if (!await needsImporting(item, action, target_path))
+            continue;
+
+         await ensureDir(target_path)
+
          actionQueue.push({ item, target_path, action });
       }
    }
+
+   if (actionQueue.length == 0) {
+      console.log("no actions!");
+      return [];
+   }
+
+   const totalSize = actionQueue.reduce((tot, { item }) => tot + item.metadata.size, 0);
+   console.log({ actions: actionQueue.length, size: formatBytes(totalSize) });
+   if (await ask("run actions? y/n: ") != "y")
+      return [];
 
    const imported_items = [];
 

@@ -58,7 +58,12 @@ async function runImport(path, target_dir, width, height, override) {
    const items = await Crawl(
       path,
       { properties: { isDir: false, } },
-      { ignore: ["\\swarm\\session", "\\flock\\"] }
+      {
+         ignore: [
+            "\\swarm\\session",
+            //  "\\flock\\"
+         ]
+      }
    );
 
    // items.sort((i1, i2) => i1.metadata.size - i2.metadata.size);
@@ -114,7 +119,7 @@ async function runMeta(path, sizes, override) {
 
    // items.sort((i1, i2) => i1.metadata.size - i2.metadata.size);
 
-   items.forEach(i => console.log(`${formatBytes(i.metadata.size)} ${i.filename_with_extension}`));
+   items.forEach(i => console.log(`${formatBytes(i.metadata.size)} - ${i.filename_with_extension}`));
    const totalSize = items.reduce((tot, i) => tot + i.metadata.size, 0);
    console.log({ items: items.length, size: formatBytes(totalSize) });
    if (await ask("meta? y/n: ") != "y")
