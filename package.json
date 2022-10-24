@@ -4,8 +4,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "compile": "node ./scripts/compile.js",
     "import": "node ./scripts/import.js",
+    "compile": "node ./scripts/compile.js",
+    "index": "node ./scripts/index.js",
     "crawl": "node ./scripts/crawl.js",
     "start": "astro dev --host",
     "build": "astro build",

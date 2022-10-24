@@ -1,5 +1,5 @@
 {
-   "kind": "page",
+   "kind": "Page",
    "title": "Homepage",
    "childElements": [
       {
@@ -12,17 +12,10 @@
                "kind": "header"
             },
             {
-               "kind": "grid",
-               "data": "videos",
+               "kind": "Grid",
+               "data": "media",
                "element": {
-                  "kind": "image"
-               }
-            },
-            {
-               "kind": "grid",
-               "data": "images",
-               "element": {
-                  "kind": "image"
+                  "kind": "ImagePreview"
                }
             }
          ]

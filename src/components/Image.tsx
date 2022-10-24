@@ -4,7 +4,7 @@ const Image = (props) => {
       src={props.src}
       // alt={props.filename + props.extension}
       alt={`path: ${props.path}\n\nsrc: ${props.src}`}
-      onError={function (evt) { evt.target.style.display = "none" }}
+      // onError={function (evt) { evt.target.style.display = "none" }}
 
       {...props.attributes}
    />

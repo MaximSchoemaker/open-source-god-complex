@@ -1,7 +1,8 @@
 :root {
-   --gap: 25px;
+   --item-width: 512px;
+   --gap: 2px;
    --width: 50%;
-   --cols: 1;
+   --cols: 2;
    --size: calc(var(--width) / var(--cols) - var(--gap));
 }
 
@@ -86,7 +87,6 @@ li {
 
 img {
    display: block;
-
    /* min-width: 0;
    min-height: 0;
 
@@ -96,7 +96,9 @@ img {
    width: var(--size);
    height: var(--size); */
 
+   /* width: var(--item-width); */
    width: 100%;
+   /* max-width: 100%; */
    aspect-ratio: 1 / 1;
 
    object-fit: cover;
@@ -104,6 +106,7 @@ img {
    overflow-wrap: break-word;
 
    overflow: auto;
+   background-color: rgba(125, 0, 255, 0.25);
 }
 
 @media (orientation: portrait) {
@@ -113,11 +116,12 @@ img {
 }
 
 #Grid {
+   visibility: hidden;
    /* display: flex;
    flex-wrap: wrap; */
 
    display: grid;
-   grid-template-columns: repeat(var(--cols), 1fr);
+   grid-template-columns: repeat(var(--cols), var(--item-width));
 
    gap: var(--gap);
 }

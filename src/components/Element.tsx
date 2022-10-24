@@ -2,6 +2,7 @@ import Page from "./Page";
 import List from "./List";
 import Image from "./Image";
 import Grid from "./Grid";
+import ImagePreview from "./ImagePreview";
 import structures from "../compiled/structuresImports.js";
 
 export interface Props {
@@ -34,14 +35,16 @@ const Element = (props) => {
 			return <section {...props.attributes} children={children} />;
 		case "a":
 			return <a {...props.attributes} children={children} />;
-		case "page":
+		case "Page":
 			return <Page {...props} />;
-		case "list":
+		case "List":
 			return <List {...props} />;
-		case "image":
+		case "Image":
 			return <Image {...props} />;
-		case "grid":
+		case "Grid":
 			return <Grid {...props} />;
+		case "ImagePreview":
+			return <ImagePreview {...props} />;
 		default:
 			for (const element of structures) {
 				const { structure, meta } = element;
