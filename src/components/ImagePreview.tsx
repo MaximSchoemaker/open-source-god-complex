@@ -60,7 +60,7 @@ const ImagePreview = (props) => {
       />
       <a
          ref={a_ref}
-         class={`image-preview-header ${hovering() ? "show" : ""} ${props.cols() < 3 ? "always-show" : ""}`}
+         class={`image-preview-header ${hovering() ? "show" : ""} ${props.cols() == 1 ? "always-show" : ""}`}
          style={{ top: (75 - props.item_y()) + "px" }}
          href={`/media/${props.id}`}
          onblur={() => set_hovering(false)}

@@ -118,13 +118,11 @@ li {
 }
 
 #Grid {
-   visibility: hidden;
    position: relative;
    width: 100%;
 
    display: flex;
    align-items: flex-end;
-   /* justify-content: center; */
    margin-bottom: 25vh;
 }
 #Grid.no-touch {
@@ -141,14 +139,8 @@ li {
    bottom: -1px;
 
    display: flex;
-   gap: calc(var(--gap));
+   gap: var(--gap);
 }
-
-/* @media (orientation: portrait) {
-   .grid-footer {
-      margin-right: calc(var(--gap) * -1);
-   }
-} */
 
 .button {
    display: block;
@@ -230,15 +222,13 @@ li {
 
    opacity: 0;
    transition: opacity 0.5s;
-   /* animation: rotate 0.75s infinite normal linear; */
    animation: wave 0.5s infinite alternate ease-in;
    animation-delay: calc(var(--item_index) * -1s / (var(--cols) + 1));
-   /* display: none; */
 }
 
-/* .image-preview-container:hover .image-preview-header {
+.image-preview-container:hover .image-preview-header {
    opacity: 1;
-} */
+}
 .image-preview-header.show,
 .image-preview-header.always-show {
    opacity: 1;
