@@ -1,0 +1,16 @@
+---
+import data from "../../compiled/media.json";
+import Media from "./media.astro";
+
+export function getStaticPaths() {
+   return data.map((item, i) => {
+      i == 0 && console.log(item.id);
+      return { params: { id: item.id.toString() } };
+   });
+}
+
+const { id } = Astro.params;
+const item = data.find((d) => d.id == id);
+---
+
+<Media item={item} />

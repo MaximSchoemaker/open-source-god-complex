@@ -57,23 +57,22 @@ async function runIndex(path, meta_sizes) {
    items.sort((i1, i2) => weight(i2) - weight(i1))
 
    const srced_items = items.map(item => {
-      item.src = item.path.replace("public\\", "");
+      item.src = item.path.replace("public\\", "\\");
       return item;
    });
 
    const mipmapped_items = await Promise.all(srced_items.map(async item => {
-      const mipmaps = await Promise.all(
+      const mipmaps = (await Promise.all(
          meta_sizes.map(async ({ width, height }) => {
             const mipmap_extension = mipmapExtension(item);
             const mipmap_path = PATH.join(item.directory, "_meta", `${item.filename} ${width}x${height}${mipmap_extension}`);
             if (!await exists(mipmap_path))
                return null;
             // return generateItem(mipmap_path);
-            const mipmap_path_src = mipmap_path.replace("public\\", "");
+            const mipmap_path_src = mipmap_path.replace("public\\", "\\");
             return { width, height, src: mipmap_path_src };
          })
-            .filter(i => i != null)
-      );
+      )).filter(i => i != null);
 
       item.mipmaps = mipmaps;
       return item;
