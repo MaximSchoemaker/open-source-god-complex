@@ -17,7 +17,7 @@ const data = {
 const Grid = (props) => {
 
    let el;
-   const [item_width, set_item_width] = createSignal(0);
+   const [item_width, set_item_width] = createSignal(1080);
    const [cols, set_cols] = createSignal(
       Number.parseInt(localStorage.getItem("grid-cols") ?? "2")
    );
@@ -121,7 +121,7 @@ const Grid = (props) => {
 
    const i_range = () => Math.ceil(1080 / (item_width() + gap()) + 1) * cols();
    const items = (props.childElements ?? data[props.data]);
-   const elementProps = () => items
+   const elementProps = () => !el ? [] : items
       // .filter(d => !d.should_import)
       .slice(i_offset(), i_offset() + i_range())
       .map((content) => Object.assign(content, { ...props.element }))
@@ -147,8 +147,8 @@ const Grid = (props) => {
          />
       }</For>
       <div class="grid-footer">
-         <div class="button" onClick={() => set_cols(cols => cols + 1)}>+</div>
-         <div class="button" onClick={() => set_cols(cols => Math.max(1, cols - 1))}>-</div>
+         <div class="button" onClick={() => set_cols(cols => cols + 1)}>-</div>
+         <div class="button" onClick={() => set_cols(cols => Math.max(1, cols - 1))}>+</div>
       </div>
 
    </div>
