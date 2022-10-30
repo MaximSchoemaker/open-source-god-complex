@@ -40,13 +40,20 @@ const Grid = (props) => {
    const item_props = createMemo(() => {
       // if (isServer)
       //    return [];
+      const scroll_fract = Math.max(0, (scroll_y() - el_top()) / grid_height());
+      const mid = Math.floor(items.length * scroll_fract);
+      for (var bottom = mid; bottom < items.length - 1; bottom++) {
+         const item_screen_bottom = itemScreenY(bottom)() + item_width();
+         if (item_screen_bottom >= buffer_bottom())
+            break;
+      }
+      for (var top = mid; top > 0; top--) {
+         const item_screen_y = itemScreenY(top)();
+         if (item_screen_y <= buffer_top())
+            break;
+      }
 
-      let item_props = items.filter((item, i) => {
-         const item_screen_y = itemScreenY(i)();
-         const item_screen_bottom = item_screen_y + item_width();
-         return item_screen_bottom > buffer_top()
-            && item_screen_y < buffer_bottom()
-      })
+      let item_props = items.slice(top, bottom);
 
       const items_on_buffer_zone_count = Math.floor((2 + (window.innerHeight + buffer_zone) / (item_width() + gap())) * cols());
       const item_props_length_max = Math.max(20, items_on_buffer_zone_count * 1.5);
@@ -56,6 +63,7 @@ const Grid = (props) => {
          else
             item_props = item_props.slice(0, item_props_length_max);
       }
+
       return item_props;
    })
 
