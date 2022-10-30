@@ -168,11 +168,6 @@ li {
    background-color: var(--color-neutral);
 }
 
-.image-preview-container:focus-within {
-   /* outline: calc(var(--gap) * 2) solid var(--color-neutral);
-   outline-offset: calc(var(--gap) * -2); */
-}
-
 .image-preview-container {
    top: 0;
    left: 0;
@@ -181,6 +176,8 @@ li {
    /* width: 1000px; */
    transform-origin: left top;
    aspect-ratio: 1 / 1;
+
+   /* transition: transform 0.2s; */
 }
 
 .image-preview {
@@ -199,15 +196,15 @@ li {
    height: 100%;
    min-width: 0;
 
-   overflow: auto;
+   /* overflow: auto; */
    background-color: rgba(125, 0, 255, 0.25);
 }
 
-@media (orientation: portrait) {
+/* @media (orientation: portrait) {
    .image-preview {
       overflow: hidden;
    }
-}
+} */
 
 .loading-animation {
    transform-origin: left top;

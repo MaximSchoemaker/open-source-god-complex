@@ -4,7 +4,9 @@ import Element from "../components/Element";
 ---
 
 <Layout title="About">
-	<Element kind="about" client:load />
+	<!-- <Element kind="about"  /> -->
+	<Element kind="about" client:only="solid"/>
+	<!-- <Element kind="about" client:load /> -->
 </Layout>
 
 <style></style>

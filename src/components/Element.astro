@@ -1,0 +1,69 @@
+---
+import Page from "./Page.astro";
+import List from "./List";
+import Image from "./Image";
+import Grid from "./Grid";
+import ImagePreview from "./ImagePreview";
+import structures from "../compiled/structuresImports.js";
+
+export interface Props {
+	kind: string;
+	title?: string;
+	content?: string;
+	childElements?: [Props];
+	meta?: any;
+	image?: any;
+	attributes?: {
+		id?: string;
+		class?: string;
+	}
+}
+
+const {props} = Astro;
+
+function getStructureProps() {
+	for (const element of structures) {
+		const { structure, meta } = element;
+		if (props.kind == meta.filename)
+			return structure
+	}
+}
+
+function getElement() {
+	switch (props.kind) {
+		case "Page":
+			return {el: Page, props};
+		case "List":
+			return {el: List, props};
+		case "Image":
+			return  {el: Image, props};
+		case "Grid":
+			return {el: Grid, props} ;
+		case "ImagePreview":
+			return {el: ImagePreview, props} ;
+		default:
+			for (const element of structures) {
+				const { structure, meta } = element;
+				if (props.kind == meta.filename)
+					return {el: Astro.self, props: structure};
+			}
+			const childrenProps = props.childElements && props.childElements[0];
+			return {el: props.kind, props, children: childrenProps ?? props.content };
+	}
+}
+
+const element = getElement();
+---
+
+{ element
+	? <element.el {...element.props} >
+		{!element.children?.length 
+			? element.children 
+			: element.children.map(props => {
+				console.log("child", props);
+				return <Astro.self {...props} />
+			})
+		}
+	</element.el>
+	: <span>error: kind "{props.kind}" not supported</span>
+}

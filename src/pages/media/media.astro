@@ -1,23 +1,26 @@
 ---
 const { item } = Astro.props;
-console.log(item.extension);
 ---
 
-<main>
-   <h1>{item.filename_with_extension}</h1>
-   {item.extension == ".mp4" && <video autoplay muted loop src={item.src} />}
-   {item.extension == ".jpg" && <img src={item.src} />}
-   <table>
-      {
-         Object.entries(item.metadata).map(([key, data]) => (
-            <tr>
-               <td>{key}:&nbsp;</td>
-               <td>{data}</td>
-            </tr>
-         ))
-      }
-   </table>
-</main>
+{
+   item && (
+      <main>
+         <h1>{item.filename_with_extension}</h1>
+         {item.extension == ".mp4" && (
+            <video autoplay muted loop src={item.src} />
+         )}
+         {item.extension == ".jpg" && <img src={item.src} />}
+         <table>
+            {Object.entries(item.metadata).map(([key, data]) => (
+               <tr>
+                  <td>{key}:&nbsp;</td>
+                  <td>{data}</td>
+               </tr>
+            ))}
+         </table>
+      </main>
+   )
+}
 
 <style>
    :root {

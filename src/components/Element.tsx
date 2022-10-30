@@ -4,6 +4,7 @@ import Image from "./Image";
 import Grid from "./Grid";
 import ImagePreview from "./ImagePreview";
 import structures from "../compiled/structuresImports.js";
+import h from "solid-js/h";
 
 export interface Props {
 	kind: string;
@@ -19,8 +20,6 @@ export interface Props {
 }
 
 const Element = (props) => {
-	// console.log(props.id, props.type);
-
 	const elementChildren =
 		props.childElements && props.childElements[0]
 		&& props.childElements.map((props) => {
@@ -28,13 +27,14 @@ const Element = (props) => {
 		});
 
 	const children = elementChildren || props.content;
+
 	switch (props.kind) {
-		case "div":
-			return <div {...props.attributes} children={children} />;
-		case "section":
-			return <section {...props.attributes} children={children} />;
-		case "a":
-			return <a {...props.attributes} children={children} />;
+		// case "div":
+		// 	return <div {...props.attributes} children={children} />;
+		// case "section":
+		// 	return <section {...props.attributes} children={children} />;
+		// case "a":
+		// 	return <a {...props.attributes} children={children} />;
 		case "Page":
 			return <Page {...props} />;
 		case "List":
@@ -42,7 +42,7 @@ const Element = (props) => {
 		case "Image":
 			return <Image {...props} />;
 		case "Grid":
-			return <Grid {...props} />;
+			return <Grid {...props} />
 		case "ImagePreview":
 			return <ImagePreview {...props} />;
 		default:
@@ -51,8 +51,8 @@ const Element = (props) => {
 				if (props.kind == meta.filename)
 					return <Element {...structure} />
 			}
-			break;
-		// return <Element {...headerLayout} />;
+			return h(props.kind, { ...props.attributes, children });
+		// break;
 	}
 	return <span>error: kind "{props.kind}" not supported</span>;
 }

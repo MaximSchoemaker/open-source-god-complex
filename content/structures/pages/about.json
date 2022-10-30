@@ -10,6 +10,15 @@
          "childElements": [
             {
                "kind": "header"
+            },
+            {
+               "kind": "a",
+               "childElements": [
+                  {
+                     "kind": "div",
+                     "content": "yo"
+                  }
+               ]
             }
          ]
       }

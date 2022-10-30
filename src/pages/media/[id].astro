@@ -3,10 +3,7 @@ import data from "../../compiled/media.json";
 import Media from "./media.astro";
 
 export function getStaticPaths() {
-   return data.map((item, i) => {
-      i == 0 && console.log(item.id);
-      return { params: { id: item.id.toString() } };
-   });
+   return data.map((item, i) => ({ params: { id: item.id.toString() } }));
 }
 
 const { id } = Astro.params;
