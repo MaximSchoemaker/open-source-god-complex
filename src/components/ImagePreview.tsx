@@ -22,7 +22,7 @@ const ImagePreview = (props) => {
 
       setTimeout(() => {
          set_mipmap_index(new_mipmap_index);
-         set_loading(true);
+         set_loading(!el.complete);
       })
    }
 
@@ -41,7 +41,6 @@ const ImagePreview = (props) => {
       >
          <img
             class="image-preview"
-            // loading="lazy"
             ref={el}
             src={src()}
             alt={props.file_name}
