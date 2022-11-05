@@ -3,7 +3,7 @@ import { createEffect, createRenderEffect, createSignal, For, createMemo, untrac
 import Element from "./Element";
 
 import media from "../compiled/media.json";
-import { isServer } from "solid-js/web";
+import { isServer, useAssets } from "solid-js/web";
 
 const data = {
    media,
@@ -20,6 +20,7 @@ const Grid = (props) => {
       .map((content, index) => ({ ...content, ...props.element, index }));
 
    const [scroll_y, set_scroll_y] = createSignal(0);
+   const [scroll_y_restored, set_scroll_y_restored] = createSignal(false);
    const [buffer_scroll_vel, set_buffer_scroll_vel] = createSignal(-1);
    const [el_width, set_el_width] = createSignal(1080);
    const [el_top, set_el_top] = createSignal(10);
@@ -38,18 +39,18 @@ const Grid = (props) => {
    const grid_screen_y = () => el_top() - scroll_y();
 
    const buffer_zone = window.innerHeight / 2;
-   const buffer_top = () => Math.max(0, Math.min(grid_height(),
+   const buffer_top = createMemo(() => Math.max(0, Math.min(untrack(grid_height),
       -grid_screen_y()
       + (buffer_scroll_vel() > 0 ? 0 : Math.min(buffer_scroll_vel(), -buffer_zone))
       // - buffer_zone
       // + item_size()
-   ));
-   const buffer_bottom = () => Math.max(0, Math.min(grid_height(),
+   )));
+   const buffer_bottom = createMemo(() => Math.max(0, Math.min(untrack(grid_height),
       -grid_screen_y() + window.innerHeight
       + (buffer_scroll_vel() < 0 ? 0 : Math.max(buffer_scroll_vel(), buffer_zone))
       // + buffer_zone
       // - item_size()
-   ));
+   )));
 
    // const buffer_top_i = createMemo(() => Math.max(0, Math.floor(buffer_top() / (untrack(item_size) + gap())) * untrack(cols)));
    // const buffer_bottom_i = createMemo(() => Math.min(items.length, Math.ceil(buffer_bottom() / (untrack(item_size) + gap())) * untrack(cols)));
@@ -89,16 +90,17 @@ const Grid = (props) => {
          const next_bottom = item_bottom(next_bottom_item.index);
 
          if (next_top <= next_bottom)
-            timeline.push({ ...top_sorted_items_stack.pop(), timeline: "open", timeline_y: next_top });
-         // timeline.push(Object.assign(top_sorted_items_stack.pop(), { timeline: "open", timeline_y: next_top }));
+            timeline.push({ index: top_sorted_items_stack.pop().index, timeline: "open", timeline_y: next_top });
          else
-            timeline.push({ ...bottom_sorted_items_stack.pop(), timeline: "close", timeline_y: next_bottom });
-         // timeline.push(Object.assign(bottom_sorted_items_stack.pop(), { timeline: "close", timeline_y: next_bottom }));
+            timeline.push({ index: bottom_sorted_items_stack.pop().index, timeline: "close", timeline_y: next_bottom });
       }
-      console.log({ timeline });
+
+      // console.log({ timeline });
 
       return timeline;
    });
+
+   // createEffect(() => console.log(visible_items().length));
 
    createEffect((prev_timeline) => {
       const timeline = untrack(item_timeline);
@@ -139,7 +141,7 @@ const Grid = (props) => {
       for (let i = prev_timeline_top_i; i > new_timeline_top_i; i--) {
          const top_item = timeline[i];
          if (top_item.timeline == "close")
-            new_add_visible_items.add(i)
+            new_add_visible_items.add(top_item.index)
       }
 
       prev_timeline_bottom_i = Math.min(timeline.length - 1, prev_timeline_bottom_i);
@@ -148,7 +150,7 @@ const Grid = (props) => {
       for (let i = prev_timeline_bottom_i + 1; i <= new_timeline_bottom_i; i++) {
          const bottom_item = timeline[i];
          if (bottom_item.timeline == "open")
-            new_add_visible_items.add(i)
+            new_add_visible_items.add(bottom_item.index)
       }
 
       for (let i = prev_timeline_bottom_i; i > new_timeline_bottom_i; i--) {
@@ -158,7 +160,7 @@ const Grid = (props) => {
       }
 
       new_visible_items = new_visible_items
-         .concat(Array.from(new_add_visible_items).map(i => timeline[i]))
+         .concat(Array.from(new_add_visible_items).map(i => items[i]))
          .filter(i => !new_remove_visible_items.has(i.index))
 
       set_timeline_top_i(new_timeline_top_i);
@@ -168,13 +170,6 @@ const Grid = (props) => {
       return timeline;
    }, item_timeline());
 
-   // function resetTimeline() {
-   //    set_timeline_top_i(0);
-   //    set_timeline_bottom_i(0);
-   //    set_visible_items([]);
-   // }
-
-   // createEffect(() => console.log(visible_items().length));
 
    // const item_props = createMemo(() => {
    //    // console.log("item_props", scroll_y());
@@ -235,7 +230,6 @@ const Grid = (props) => {
       return new_grid_height;
    }, grid_height());
 
-
    onscroll = () => {
       if (cancelScrollEvent) {
          cancelScrollEvent = false;
@@ -254,7 +248,6 @@ const Grid = (props) => {
       clearTimeout(debounce);
       debounce = setTimeout(() => set_buffer_scroll_vel(0));
 
-      localStorage.setItem("scroll-y", scroll_y().toString());
    }
 
    onmouseup = () => set_buffer_scroll_vel(0);
@@ -262,7 +255,13 @@ const Grid = (props) => {
    function restoreScrollY() {
       const saved_scroll_y = Number.parseFloat(localStorage.getItem("scroll-y") ?? "0");
       jump(saved_scroll_y);
+      set_scroll_y_restored(true);
    }
+
+   createEffect(() => {
+      if (scroll_y_restored())
+         localStorage.setItem("scroll-y", scroll_y().toString());
+   });
 
    function bind(_el) {
       el = _el;
@@ -280,12 +279,8 @@ const Grid = (props) => {
    }
 
    function changeCols(new_cols) {
-      if (new_cols > 0) {
-         batch(() => {
-            // resetTimeline();
-            set_cols(new_cols);
-         });
-      }
+      if (new_cols > 0)
+         set_cols(new_cols);
    }
 
    function jump(new_scroll_y) {
