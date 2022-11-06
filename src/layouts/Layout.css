@@ -174,31 +174,100 @@ li {
    position: absolute;
 
    /* width: 1000px; */
-   transform-origin: left top;
    aspect-ratio: 1 / 1;
 
+   /* transform: scale(0); */
    /* transition: transform 0.2s; */
 }
 
 .image-preview {
-   z-index: -1;
    position: absolute;
-   top: 0;
+   width: 100%;
+   height: 100%;
+   /* background-color: black; */
+   background-color: rgba(125, 0, 255, 0.25);
+   overflow: hidden;
+}
 
+.image-preview-container img {
+   position: absolute;
    display: block;
-
    object-fit: cover;
 
    white-space: pre-wrap;
    overflow-wrap: break-word;
 
+   min-width: 0;
    width: 100%;
    height: 100%;
-   min-width: 0;
-
-   /* overflow: auto; */
-   background-color: rgba(125, 0, 255, 0.25);
 }
+
+.scale-fade-in {
+   animation: scale-fade-in 0.3s;
+}
+
+.fade-in {
+   animation: fade-in 0.2s;
+}
+
+@keyframes fade-in {
+   from {
+      opacity: 0;
+   }
+   to {
+      opacity: 1;
+   }
+}
+
+@keyframes scale-in {
+   from {
+      transform: scale(0);
+   }
+   to {
+      transform: scale(1);
+   }
+}
+
+@keyframes scale-fade-in {
+   from {
+      opacity: 0;
+      transform: scale(0);
+   }
+   80% {
+      transform: scale(1);
+   }
+   to {
+      opacity: 1;
+      transform: scale(1);
+   }
+}
+
+/* 
+.fade-in:not(.visible) {
+   opacity: 0;
+}
+.fade-in.visible {
+   transition: opacity 0.2s;
+   opacity: 1;
+}
+
+.scale-in:not(.visible) {
+   transform: scale(0);
+}
+.scale-in.visible {
+   transition: transform 0.2s;
+   transform: scale(1);
+}
+
+.scale-fade-in:not(.visible) {
+   transform: scale(0);
+   opacity: 0;
+}
+.scale-fade-in.visible {
+   transition: opacity 0.3s, transform 0.2s;
+   transform: scale(1);
+   opacity: 1;
+} */
 
 /* @media (orientation: portrait) {
    .image-preview {

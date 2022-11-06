@@ -7,7 +7,7 @@ import { isServer, useAssets } from "solid-js/web";
 
 const data = {
    media,
-   // media: media.slice(0, 25),
+   // media: media.slice(0, 2),
 };
 
 const Grid = (props) => {
@@ -32,25 +32,27 @@ const Grid = (props) => {
 
    const itemX = (i) => () => (i % cols()) * (item_size() + gap());
    const itemY = (i) => () => Math.floor(i / cols()) * (item_size() + gap());
-   const itemScreenY = (i) => () => itemY(i)() + grid_screen_y();
+   const itemScreenY = (i) => createMemo(() => itemY(i)() + grid_screen_y());
 
    const grid_height = () => Math.ceil(items.length / cols()) * (item_size() + gap()) - gap()
    const item_size = () => el_width() / cols() - gap() * ((cols() - 1) / cols());
    const grid_screen_y = () => el_top() - scroll_y();
 
-   const buffer_zone = window.innerHeight / 2;
-   const buffer_top = createMemo(() => Math.max(0, Math.min(untrack(grid_height),
+   const buffer_zone = window.innerHeight / 4;
+   const buffer_top = createMemo(() => Math.round(Math.max(0, Math.min(untrack(grid_height),
       -grid_screen_y()
-      + (buffer_scroll_vel() > 0 ? 0 : Math.min(buffer_scroll_vel(), -buffer_zone))
+
+      + (buffer_scroll_vel() > 0 ? 0 : Math.min(buffer_scroll_vel() * 2, -buffer_zone))
       // - buffer_zone
       // + item_size()
-   )));
-   const buffer_bottom = createMemo(() => Math.max(0, Math.min(untrack(grid_height),
+   ))));
+   const buffer_bottom = createMemo(() => Math.round(Math.max(0, Math.min(untrack(grid_height),
       -grid_screen_y() + window.innerHeight
-      + (buffer_scroll_vel() < 0 ? 0 : Math.max(buffer_scroll_vel(), buffer_zone))
+
+      + (buffer_scroll_vel() < 0 ? 0 : Math.max(buffer_scroll_vel() * 2, buffer_zone))
       // + buffer_zone
       // - item_size()
-   )));
+   ))));
 
    // const buffer_top_i = createMemo(() => Math.max(0, Math.floor(buffer_top() / (untrack(item_size) + gap())) * untrack(cols)));
    // const buffer_bottom_i = createMemo(() => Math.min(items.length, Math.ceil(buffer_bottom() / (untrack(item_size) + gap())) * untrack(cols)));
@@ -170,52 +172,6 @@ const Grid = (props) => {
       return timeline;
    }, item_timeline());
 
-
-   // const item_props = createMemo(() => {
-   //    // console.log("item_props", scroll_y());
-
-   //    // if (isServer)
-   //    //    return [];
-
-   //    const _cols = untrack(cols);
-   //    const _grid_height = untrack(grid_height);
-   //    const _item_width = untrack(item_width);
-   //    const _buffer_top = untrack(buffer_top);
-   //    const _buffer_bottom = untrack(buffer_bottom);
-   //    const _buffer_scroll_vel = untrack(buffer_scroll_vel);
-
-   //    const scroll_fract = Math.max(0, (scroll_y() - el_top() + window.innerHeight / 2) / _grid_height);
-   //    const mid = Math.floor(items.length * scroll_fract / _cols) * _cols;
-   //    let top, bottom;
-
-   //    for (let i = mid; i >= 0; i--) {
-   //       const item_screen_bottom = untrack(itemScreenY(i)) + _item_width;
-   //       if (item_screen_bottom <= _buffer_top)
-   //          break;
-   //       top = i;
-   //    }
-
-   //    for (let i = mid; i < items.length; i++) {
-   //       const item_screen_top = untrack(itemScreenY(i));
-   //       if (item_screen_top >= _buffer_bottom)
-   //          break;
-   //       bottom = i;
-   //    }
-
-   //    let item_props = items.slice(top, bottom + 1);
-
-   //    const items_on_buffer_zone_count = Math.floor((2 + (window.innerHeight + buffer_zone) / (_item_width + gap())) * _cols);
-   //    const item_props_length_max = Math.floor(Math.max(20, items_on_buffer_zone_count * 1.5) / _cols) * _cols;
-   //    if (item_props.length > item_props_length_max) {
-   //       if (_buffer_scroll_vel > 0)
-   //          item_props = item_props.slice(item_props.length - item_props_length_max + 1, -1);
-   //       else
-   //          item_props = item_props.slice(0, item_props_length_max);
-   //    }
-
-   //    return item_props;
-   // })
-
    createEffect(() => localStorage.setItem("grid-cols", cols().toString()));
    createEffect(() => el.style.setProperty('--item-width', item_size() + "px"));
    createEffect(() => el.style.setProperty('--cols', cols()));
@@ -244,13 +200,14 @@ const Grid = (props) => {
       const new_buffer_scroll_vel = Math.abs(scroll_vel) < window.innerHeight * 5
          ? scroll_vel : Math.sign(scroll_vel)
       set_buffer_scroll_vel(new_buffer_scroll_vel);
-
-      clearTimeout(debounce);
-      debounce = setTimeout(() => set_buffer_scroll_vel(0));
-
    }
 
-   onmouseup = () => set_buffer_scroll_vel(0);
+   createEffect(() => {
+      // console.log(buffer_scroll_vel())
+      clearTimeout(debounce);
+      if (buffer_scroll_vel() != 0)
+         debounce = setTimeout(() => set_buffer_scroll_vel(0), 1000);
+   });
 
    function restoreScrollY() {
       const saved_scroll_y = Number.parseFloat(localStorage.getItem("scroll-y") ?? "0");
@@ -297,14 +254,14 @@ const Grid = (props) => {
             // "background-color": Math.abs(buffer_scroll_vel()) == 1 ? "red" : "white"
          }}
          ref={bind}
-         ontouchstart={() => set_buffer_scroll_vel(0)}
       >
          <For each={visible_items()}>{(props, i) =>
             <Element {...props}
-               item_width={item_size}
+               item_size={item_size}
                item_index={props.index}
                item_x={itemX(props.index)}
                item_y={itemY(props.index)}
+               item_screen_y={itemScreenY(props.index)}
                cols={cols}
             // show={show(props.index)}
             />
