@@ -1,53 +1,67 @@
 
 const cache = {};
 
-let delay = 0;
+let delay = -1;
 let debounce;
 
-export function getMedia(src) {
+export function getMedia({ id, construct, cleanup }) {
    // const { id, src } = resource;
    // console.log(src);
 
    clearTimeout(debounce);
    debounce = setTimeout(() => {
-      // console.log(delay);
-      delay = 0
+      delay = -1
    });
 
    return new Promise((resolve, reject) => {
-      if (src == "") {
+      if (!id) {
          reject();
          return;
       }
 
-      const media = cache[src] ?? new Image();
-      cache[src] = media;
-
       function _resolve(media) {
-         if (delay > 0)
-            setTimeout(() => resolve(media), delay);
-         else
+         if (delay < 0)
             resolve(media)
+         else
+            setTimeout(() => resolve(media), delay);
          delay++;
       }
 
-      if (media.loadEnded) {
-         media.onload = null;
-         media.cached = true;
-         _resolve(media);
-         return;
-      }
-
-      media.onload = () => {
+      function onLoad() {
          onLoadEnd(media);
          _resolve(media);
       }
-      media.onabort = () => {
-         reject();
+
+      function onError(e) {
+         console.error("onError!", filename(media.id));
+         // reject();
       }
 
-      if (!media.isLoading) {
-         media.src = src;
+      function onAbort() {
+         console.warn("onAbort!", filename(media.id));
+         // reject();
+      }
+
+      // function _construct() {
+      //    const new_media = construct(onLoad, onError, onAbort);
+      //    new_media.onAbort = onAbort;
+      //    new_media.cleanup = cleanup;
+      //    new_media.id = id;
+      //    new_media.cached = false;
+      //    onLoadStart(new_media);
+      //    return new_media;
+      // }
+
+      const media = cache[id] ?? construct(onLoad, onError, onAbort);
+      cache[id] = media;
+
+      if (media.loadEnded) {
+         media.cached = true;
+         _resolve(media);
+      } else {
+         media.onAbort = onAbort;
+         media.cleanup = cleanup;
+         media.id = id;
          media.cached = false;
          onLoadStart(media);
       }
@@ -55,20 +69,18 @@ export function getMedia(src) {
 }
 
 
-export function cancelMedia(src) {
-   const media = cache[src];
+export function cancelMedia(id) {
+   const media = cache[id];
 
    if (media && media.isLoading) {
-      // console.log("canceled", src);
-
-      media.src = "";
+      // console.log("canceled", id);
+      media.cleanup(media);
       media.isLoading = false;
-      cache[src] = null;
-      media.onabort();
+      cache[id] = null;
 
       loading_count--;
-      delay = Math.max(0, delay - 1);
-      // console.log(loading_count);
+      delay = Math.max(-1, delay - 1);
+      console.log(loading_count, "cancel", filename(media.id));
    }
 }
 
@@ -77,18 +89,18 @@ function onLoadStart(media) {
    // console.log("loading...", media.src);
    media.loadEnded = false;
    media.isLoading = true;
-
    loading_count++;
-   // console.log(loading_count);
+   console.log(loading_count, "load start", filename(media.id));
 }
 
 function onLoadEnd(media) {
-   // console.log("loaded!", media.src);
+   // console.log("loaded!", media.id);
    media.loadEnded = true;
    media.isLoading = false;
-
-   // cache[media.src] = media.cloneNode();
-
    loading_count--;
-   // console.log(loading_count);
+   console.log(loading_count, "load end", filename(media.id));
+}
+
+function filename(src) {
+   return src.split("\\").at(-1)
 }

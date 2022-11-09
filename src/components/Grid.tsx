@@ -10,6 +10,12 @@ const data = {
    // media: media.slice(0, 2),
 };
 
+// const colors = new Array(10).fill(null).map((_, index) => ({ index }));
+// console.log(colors);
+// const data = {
+//    media: colors
+// };
+
 const Grid = (props) => {
 
    let el, debounce,
@@ -21,7 +27,7 @@ const Grid = (props) => {
 
    const [scroll_y, set_scroll_y] = createSignal(0);
    const [scroll_y_restored, set_scroll_y_restored] = createSignal(false);
-   const [buffer_scroll_vel, set_buffer_scroll_vel] = createSignal(-1);
+   const [buffer_scroll_vel, set_buffer_scroll_vel] = createSignal(0);
    const [el_width, set_el_width] = createSignal(1080);
    const [el_top, set_el_top] = createSignal(10);
    const [cols, set_cols] = createSignal(Number.parseInt(localStorage.getItem("grid-cols") ?? "2"));
@@ -203,7 +209,6 @@ const Grid = (props) => {
    }
 
    createEffect(() => {
-      // console.log(buffer_scroll_vel())
       clearTimeout(debounce);
       if (buffer_scroll_vel() != 0)
          debounce = setTimeout(() => set_buffer_scroll_vel(0), 1000);

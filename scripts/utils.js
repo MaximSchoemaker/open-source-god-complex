@@ -7,7 +7,7 @@ import OS_UTILS from 'os-utils';
 
 let _rl;
 export function get_rl() {
-   if (_rl) return rl;
+   if (_rl) return _rl;
    _rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
@@ -48,7 +48,7 @@ export function formatBytes(x) {
 export async function ensureDir(path) {
    const dir = PATH.dirname(path);
    if (!await exists(dir)) {
-      console.log(">> create dir:", dir, "\n");
+      console.log(">> create dir:", dir);
       await fs.promises.mkdir(dir, { recursive: true });
    }
 }

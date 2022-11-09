@@ -1,34 +1,7 @@
 import { cpuUsage } from "./utils.js";
 
 const CPU_TARGET = 0.75;
-
-function timeSince(date) {
-
-   var seconds = Math.floor((new Date() - date) / 1000);
-
-   var interval = seconds / 31536000;
-
-   if (interval > 1) {
-      return Math.floor(interval) + " years";
-   }
-   interval = seconds / 2592000;
-   if (interval > 1) {
-      return Math.floor(interval) + " months";
-   }
-   interval = seconds / 86400;
-   if (interval > 1) {
-      return Math.floor(interval) + " days";
-   }
-   interval = seconds / 3600;
-   if (interval > 1) {
-      return Math.floor(interval) + " hours";
-   }
-   interval = seconds / 60;
-   if (interval > 1) {
-      return Math.floor(interval) + " minutes";
-   }
-   return Math.floor(seconds) + " seconds";
-}
+const TIME_MAX = 10000;
 
 export default async function RunQueue(queue, executeAction, actionDone) {
    const running_set = new Set();
@@ -41,6 +14,8 @@ export default async function RunQueue(queue, executeAction, actionDone) {
       idle_end_time = Date.now();
 
    let cpu_usage = 0;
+   // let delay = 0;
+   let prev_time = Date.now();
 
    function log_vitals() {
       const idle_time = idle_end_time - idle_start_time;
@@ -68,7 +43,7 @@ export default async function RunQueue(queue, executeAction, actionDone) {
       if (running_set.size == 1) {
          idle_end_time = Date.now();
          const idle_time = idle_end_time - idle_start_time;
-         console.log("<< idle", idle_time, "\n");
+         // console.log("<< idle", idle_time, "\n");
       }
    }
 
@@ -78,13 +53,15 @@ export default async function RunQueue(queue, executeAction, actionDone) {
       if (running_set.size == 0) {
          idle_start_time = Date.now();
          const idle_time = idle_end_time - idle_start_time;
-         console.log(">> idle", idle_time, "\n");
+         // console.log(">> idle", idle_time, "\n");
       }
 
       log_vitals();
    }
 
    while (queue.length || running_set.size) {
+
+
       cpu_usage = await cpuUsage();
       if (cpu_usage < CPU_TARGET) {
          running_max += running_inc;
@@ -101,15 +78,33 @@ export default async function RunQueue(queue, executeAction, actionDone) {
 
       log_vitals();
 
+      prev_time = Date.now();
+      // delay = 0;
       while (queue.length && running_set.size < running_max) {
          const action = queue.pop();
          running_set_add(action);
 
+         // setTimeout(() => {
+         log_vitals();
+
+         let start_time = Date.now();
+
          executeAction(action, count - queue.length, count)
-            .then(async (ret) => {
-               await actionDone(ret, action, count - (queue.length + running_set.size), count);
+            .then(async (success) => {
+               await actionDone(success, action, count - (queue.length + running_set.size), count);
                running_set_delete(action);
+
+               let delta = Date.now() - start_time;
+               if (delta > TIME_MAX) {
+                  console.log("\n!!!took too long!!!", delta, "/", TIME_MAX, "\n");
+                  running_inc = 1;
+                  running_max /= 2;
+               } else
+                  console.log("\n---time is fine---", delta, "/", TIME_MAX, "\n");
             });
+         // }, delay);
+
+         // delay++;
       }
    }
 }

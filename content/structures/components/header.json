@@ -15,6 +15,15 @@
       },
       {
          "kind": "a",
+         "content": "Colors",
+         "attributes": {
+            "id": "colors",
+            "class": "header-button",
+            "href": "/colors"
+         }
+      },
+      {
+         "kind": "a",
          "content": "About",
          "attributes": {
             "id": "about",

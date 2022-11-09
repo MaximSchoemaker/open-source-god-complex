@@ -3,7 +3,7 @@ import Element from "./Element";
 
 const Page = (props) => {
    return <main {...props.attributes} >
-      {/* <h1>Welcome to <span class="text-gradient">{props.title}</span></h1> */}
+      <h1>Welcome to <span class="text-gradient">{props.title}</span></h1>
       {props.childElements.map((props) => <Element {...props} />)}
    </main>
 }

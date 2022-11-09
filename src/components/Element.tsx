@@ -3,6 +3,7 @@ import List from "./List";
 import Image from "./Image";
 import Grid from "./Grid";
 import ImagePreview from "./ImagePreview";
+import ColorImage from "./ColorImage";
 import structures from "../compiled/structuresImports.js";
 import h from "solid-js/h";
 
@@ -45,6 +46,8 @@ const Element = (props) => {
 			return <Grid {...props} />
 		case "ImagePreview":
 			return <ImagePreview {...props} />;
+		case "ColorImage":
+			return <ColorImage {...props} />;
 		default:
 			for (const element of structures) {
 				const { structure, meta } = element;

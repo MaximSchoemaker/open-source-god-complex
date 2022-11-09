@@ -1,0 +1,12 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Element from "../components/Element";
+---
+
+<Layout title="Welcome to Astro.">
+	<!-- <Element kind="index" /> -->
+	<Element kind="colors" client:only="solid" />
+	<!-- <Element kind="index" client:load /> -->
+</Layout>
+
+<style></style>

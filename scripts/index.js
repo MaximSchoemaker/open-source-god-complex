@@ -5,7 +5,6 @@ import Crawl, { generateItem } from "./crawl.js";
 import Import from "./import.js";
 import { ask, formatBytes, exists, ensureDir } from "./utils.js";
 
-
 await Index();
 console.log("INDEXING DONE!")
 
@@ -61,7 +60,7 @@ async function runIndex(path, meta_sizes) {
       return item;
    });
 
-   const mipmapped_items = await Promise.all(srced_items.map(async item => {
+   const indexed_items = await Promise.all(srced_items.map(async (item, i) => {
       const mipmaps = (await Promise.all(
          meta_sizes.map(async ({ width, height }) => {
             const mipmap_extension = mipmapExtension(item);
@@ -75,8 +74,9 @@ async function runIndex(path, meta_sizes) {
       )).filter(i => i != null);
 
       item.mipmaps = mipmaps;
+
       return item;
    }));
 
-   return mipmapped_items;
+   return indexed_items;
 }
