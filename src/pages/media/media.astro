@@ -9,7 +9,7 @@ const { item } = Astro.props;
          {item.extension == ".mp4" && (
             <video autoplay muted loop src={item.src} />
          )}
-         {item.extension == ".jpg" && <img src={item.src} />}
+         {[".jpg", ".webp"].includes(item.extension) && <img src={item.src} />}
          <table>
             {Object.entries(item.metadata).map(([key, data]) => (
                <tr>
@@ -54,7 +54,8 @@ const { item } = Astro.props;
    video,
    img {
       display: block;
-      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
       margin-bottom: var(--gap);
    }
    table {

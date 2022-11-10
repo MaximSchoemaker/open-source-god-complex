@@ -5,8 +5,9 @@ var CMD_PATH = 'C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe';
 export default async function ffmpeg(args) {
    return new Promise((resolve, reject) => {
       var proc = spawn(CMD_PATH, args);
-      // proc.stderr.setEncoding("utf8")
+      proc.stderr.setEncoding("utf8")
       // proc.stdout.on('data', function (data) { });
+      proc.on('error', (err) => console.error("ffmpeg error", "!", err));
       proc.on('close', resolve);
    });
 }

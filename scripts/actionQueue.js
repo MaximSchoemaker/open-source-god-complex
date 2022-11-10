@@ -1,6 +1,6 @@
 import { cpuUsage } from "./utils.js";
 
-const CPU_TARGET = 0.75;
+const CPU_TARGET = 0.25;
 const TIME_MAX = 10000;
 
 export default async function RunQueue(queue, executeAction, actionDone) {
@@ -14,6 +14,7 @@ export default async function RunQueue(queue, executeAction, actionDone) {
       idle_end_time = Date.now();
 
    let cpu_usage = 0;
+   let delta = 0;
    // let delay = 0;
    let prev_time = Date.now();
 
@@ -33,7 +34,8 @@ export default async function RunQueue(queue, executeAction, actionDone) {
          "progress:", "(", done, "/", count, ")", ",",
          "elapsed:", new Date(elapsed).toISOString().substr(11, 8), ",",
          "estimate:", done ? new Date(estimate).toISOString().substr(11, 8) : "???", ",",
-         "cpu:", Math.round(cpu_usage * 100) / 100,
+         "cpu:", Math.round(cpu_usage * 100) / 100, ",",
+         "delta:", delta,
          "}"
       );
    }
@@ -72,8 +74,9 @@ export default async function RunQueue(queue, executeAction, actionDone) {
          running_max /= 2;
          // running_max = 0;
          running_inc = 1;
+         console.log("\n!!!CPU usage too high!!!", Math.round(cpu_usage * 100) / 100, "/", CPU_TARGET, "\n");
       }
-      // running_max = Math.min(100, Math.max(1, Math.round(running_max)));
+      // running_max = Math.min(1024, Math.max(1, Math.round(running_max)));
       running_max = Math.max(1, Math.round(running_max));
 
       log_vitals();
@@ -94,13 +97,14 @@ export default async function RunQueue(queue, executeAction, actionDone) {
                await actionDone(success, action, count - (queue.length + running_set.size), count);
                running_set_delete(action);
 
-               let delta = Date.now() - start_time;
+               delta = Date.now() - start_time;
                if (delta > TIME_MAX) {
                   console.log("\n!!!took too long!!!", delta, "/", TIME_MAX, "\n");
                   running_inc = 1;
-                  running_max /= 2;
-               } else
-                  console.log("\n---time is fine---", delta, "/", TIME_MAX, "\n");
+                  running_max -= 1;
+               }
+               // else
+               //    console.log("\n---time is fine---", delta, "/", TIME_MAX, "\n");
             });
          // }, delay);
 

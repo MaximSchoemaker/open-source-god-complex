@@ -5,6 +5,8 @@ import readline from "readline";
 import OS from 'os';
 import OS_UTILS from 'os-utils';
 
+import beep from "beepbeep";
+
 let _rl;
 export function get_rl() {
    if (_rl) return _rl;
@@ -21,6 +23,7 @@ function close_rl(rl) {
 }
 
 export function ask(question) {
+   beep();
    const rl = get_rl();
    return new Promise(resolve => {
       rl.question(question, input => {
@@ -76,3 +79,4 @@ export function arrRemove(arr, value) {
    }
    return arr;
 }
+

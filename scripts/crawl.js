@@ -3,38 +3,47 @@ import PATH from 'path';
 
 import { UUID } from "./utils.js";
 
+const LOG = true;
+
 function shouldIgnore(path, ignore) {
    return ignore.some(ignore => path.includes(ignore));
 }
 
 export async function generateItem(path) {
-   const metadata = await fs.promises.lstat(path);
-   const isDir = metadata.isDirectory();
+   try {
+      const metadata = await fs.promises.lstat(path);
+      const isDir = metadata.isDirectory();
 
-   let id = UUID();
+      let id = UUID();
 
-   const item = {
-      id,
-      isDir,
-      metadata,
-      path,
-   };
+      const item = {
+         id,
+         isDir,
+         metadata,
+         path,
+      };
 
-   if (!isDir) {
-      const extension = PATH.extname(path);
-      const directory = PATH.dirname(path);
-      const filename = PATH.basename(path, extension);
-      const filename_with_extension = PATH.basename(path);
+      if (!isDir) {
+         const extension = PATH.extname(path);
+         const directory = PATH.dirname(path);
+         const filename = PATH.basename(path, extension);
+         const filename_with_extension = PATH.basename(path);
 
-      Object.assign(item, {
-         directory,
-         filename,
-         extension,
-         filename_with_extension,
-      });
+         Object.assign(item, {
+            directory,
+            filename,
+            extension,
+            filename_with_extension,
+         });
+      }
+
+      return item;
+
+   } catch (err) {
+      console.error("error!", path, "\n>", err, "\n");
+      return { path, error: err }
    }
 
-   return item;
 }
 
 export function checkProfile(item, profile) {
@@ -73,12 +82,14 @@ async function Crawl(crawlPath, profile = {}, options = {}) {
    return items;
 
    async function _crawl(path, depth) {
-      // console.log(path);
+      // LOG && console.log(">> crawl:", path);
 
       // try {
 
       if (shouldIgnore(path, ignore))
          return;
+
+      // LOG && console.log(">> crawl:", path);
 
       const item = await generateItem(path);
       const crawl_relative_path = path.replace(crawlPath, "");
@@ -90,8 +101,10 @@ async function Crawl(crawlPath, profile = {}, options = {}) {
 
       const { isDir } = item;
 
-      if (checkProfile(item, profile))
+      if (checkProfile(item, profile)) {
+         LOG && console.log(">> crawl add:", path);
          items.push(item);
+      }
 
       if (isDir && shouldCrawl(depth)) {
 

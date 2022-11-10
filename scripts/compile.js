@@ -10,38 +10,38 @@ await Compile();
 console.log("COMPILATION DONE!")
 
 async function Compile() {
-   const item_settings = [
-      {
-         path: "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\rendr",
-         profile: {},
-         options: {},
-         target_dir: "public\\compiled\\rendr",
-         width: 1080, height: 1080, override: false
-      },
-      {
-         path: "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\JS Projects\\graphics\\screenshots",
-         profile: {},
-         options: { ignore: ["\\swarm\\session"] },
-         target_dir: "public\\compiled\\graphics_screenshots",
-         width: 1080, height: 1080, override: false
-      },
-      {
-         path: "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\JS Projects\\graphics\\videos",
-         profile: {},
-         options: { ignore: ["\\shepherd\\", "\\phone\\"] },
-         target_dir: "public\\compiled\\graphics_videos",
-         width: 1080, height: 1080, override: false
-      }
-   ]
+   // const item_settings = [
+   //    {
+   //       path: "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\rendr",
+   //       profile: {},
+   //       options: {},
+   //       target_dir: "public\\compiled\\rendr",
+   //       width: 1080, height: 1080, override: false
+   //    },
+   //    {
+   //       path: "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\JS Projects\\graphics\\screenshots",
+   //       profile: {},
+   //       options: { ignore: ["\\swarm\\session"] },
+   //       target_dir: "public\\compiled\\graphics_screenshots",
+   //       width: 1080, height: 1080, override: false
+   //    },
+   //    {
+   //       path: "C:\\Users\\Maxim\\Dropbox\\My Own Stuff\\JS Projects\\graphics\\videos",
+   //       profile: {},
+   //       options: { ignore: ["\\shepherd\\", "\\phone\\"] },
+   //       target_dir: "public\\compiled\\graphics_videos",
+   //       width: 1080, height: 1080, override: false
+   //    }
+   // ]
 
-   for (const settings of item_settings) {
-      const { path, profile, options, target_dir, width, height, override } = settings;
+   // for (const settings of item_settings) {
+   //    const { path, profile, options, target_dir, width, height, override } = settings;
 
-      const compiled_items = await compileItems(path, profile, options, target_dir, width, height, override);
-      compiled_items && console.log("count:", compiled_items.length);
-   };
+   //    const compiled_items = await compileItems(path, profile, options, target_dir, width, height, override);
+   //    compiled_items && console.log("count:", compiled_items.length);
+   // };
 
-   const mipmap_path = "public\\compiled";
+   const mipmap_path = "public\\archive";
    const mipmap_profile = {};
    const mipmap_options = {};
    const mipmap_sizes = [
@@ -60,13 +60,13 @@ async function Compile() {
    const compiled_mipmaps = await compileMipmaps(mipmap_path, mipmap_profile, mipmap_options, mipmap_sizes, mipmap_override);
    compiled_mipmaps && console.log("count:", compiled_mipmaps.length);
 
-   const metadata_path = "public\\compiled";
-   const metadata_profile = {};
-   const metadata_options = {};
-   const metadata_override = true;
+   // const metadata_path = "public\\compiled";
+   // const metadata_profile = {};
+   // const metadata_options = {};
+   // const metadata_override = true;
 
-   const compiled_metadata = await compileMetadata(metadata_path, metadata_profile, metadata_options, metadata_override);
-   compiled_metadata && console.log("count:", compiled_metadata.length);
+   // const compiled_metadata = await compileMetadata(metadata_path, metadata_profile, metadata_options, metadata_override);
+   // compiled_metadata && console.log("count:", compiled_metadata.length);
 }
 
 async function compileItems(path, profile, options, target_dir, width, height, override) {
@@ -149,6 +149,21 @@ async function compileMipmaps(path, profile, options, sizes, override) {
             kind: "ffmpeg",
             override,
             get_target_path: (item) => PATH.join(item.directory, "_meta", `${item.filename} ${width}x${height}.jpg`),
+            get_ffmpeg_args: (item, target_path) => [
+               '-y',
+               "-i", item.path,
+               "-vf", `scale=${width}:${height}:force_original_aspect_ratio=increase`,
+               target_path
+            ]
+         }
+      })),
+
+      ...sizes.map(({ width, height }) => ({
+         profile: { properties: { extension: ".webp" } },
+         action: {
+            kind: "ffmpeg",
+            override,
+            get_target_path: (item) => PATH.join(item.directory, "_meta", `${item.filename} ${width}x${height}.webp`),
             get_ffmpeg_args: (item, target_path) => [
                '-y',
                "-i", item.path,

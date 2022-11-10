@@ -9,7 +9,10 @@ await Index();
 console.log("INDEXING DONE!")
 
 async function Index() {
-   const index_path = "public\\compiled";
+   // const index_path = "public\\compiled";
+   const index_path = "public\\archive";
+   // const index_path = "public\\archive who dis";
+
    const meta_sizes = [
       { width: 2, height: 2 },
       { width: 4, height: 4 },
@@ -22,7 +25,7 @@ async function Index() {
       { width: 512, height: 512 },
    ]
    const indexed_items = await runIndex(index_path, meta_sizes);
-   console.log({ indexed_items }, "\n");
+   // console.log({ indexed_items }, "\n");
    console.log("len:", indexed_items.length);
 
    await saveToJSON("src\\compiled\\media.json", indexed_items);

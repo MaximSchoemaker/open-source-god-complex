@@ -33,7 +33,7 @@ export function getMedia({ id, construct, cleanup }) {
       }
 
       function onError(e) {
-         console.error("onError!", filename(media.id));
+         // console.error("onError!", filename(media.id));
          // reject();
       }
 
@@ -80,7 +80,7 @@ export function cancelMedia(id) {
 
       loading_count--;
       delay = Math.max(-1, delay - 1);
-      console.log(loading_count, "cancel", filename(media.id));
+      // console.log(loading_count, "cancel", filename(media.id));
    }
 }
 
@@ -90,7 +90,7 @@ function onLoadStart(media) {
    media.loadEnded = false;
    media.isLoading = true;
    loading_count++;
-   console.log(loading_count, "load start", filename(media.id));
+   // console.log(loading_count, "load start", filename(media.id));
 }
 
 function onLoadEnd(media) {
@@ -98,7 +98,7 @@ function onLoadEnd(media) {
    media.loadEnded = true;
    media.isLoading = false;
    loading_count--;
-   console.log(loading_count, "load end", filename(media.id));
+   // console.log(loading_count, "load end", filename(media.id));
 }
 
 function filename(src) {

@@ -20,9 +20,9 @@ async function copyItem(source_path, target_path) {
 async function ffmpegItem(source_path, target_path, args) {
    const source_filename_with_extension = PATH.basename(source_path);
    const target_filename_with_extension = PATH.basename(target_path);
-   LOG && console.log(">> ffmpeg:", source_filename_with_extension, "->", target_filename_with_extension);
+   // LOG && console.log(">> ffmpeg:", source_filename_with_extension, "->", target_filename_with_extension);
    await ffmpeg(args);
-   LOG && console.log("<< ffmpeg:", source_filename_with_extension, "->", target_filename_with_extension);
+   // LOG && console.log("<< ffmpeg:", source_filename_with_extension, "->", target_filename_with_extension);
 }
 
 async function metadataItem(source_path, target_path) {
@@ -67,12 +67,17 @@ export default async function Import(actionQueue) {
       },
       async (success, { item, target_path }, index, count) => {
          if (!success) {
-            LOG && console.log("<< action", "(", index, "/", count, ")", "\n");
+            LOG && console.log("!! action failed", "(", index, "/", count, ")", "\n");
             return;
          }
 
          const imported_item = await generateItem(target_path);
          imported_items.push(imported_item);
+
+         if (imported_item.error) {
+            LOG && console.log("!! generateItem failed", "(", index, "/", count, ")", "\n");
+            return
+         }
 
          LOG && console.log("<< action", "(", index, "/", count, ")",
             "\n\tfrom:", item.path,

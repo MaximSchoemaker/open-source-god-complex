@@ -35,7 +35,11 @@ const ImagePreview = (props) => {
       let new_mipmap_index = props.mipmaps.findIndex(({ width, height }) => width >= item_size && height >= item_size);
       new_mipmap_index = new_mipmap_index == -1 ? props.mipmaps.length - 1 : new_mipmap_index;
       set_mipmap_index(new_mipmap_index);
-      set_src(props.mipmaps[mipmap_index()]?.src);
+
+      const new_src = mipmap_index() == -1
+         ? props.src
+         : props.mipmaps[mipmap_index()].src
+      set_src(new_src);
    });
 
    let loaded_before = false;
@@ -43,10 +47,16 @@ const ImagePreview = (props) => {
       // image.loading && console.log("loading...", src());
       image.error && console.log("error!", src());
       setTimeout(() => set_loading(image.loading))
+
       if (!image.loading) {
          image().className = image().cached || loaded_before
             ? ""
             : alway_show() ? "fade-in" : "scale-fade-in"
+
+         if (image().naturalWidth < props.item_size() || image().naturalHeight < props.item_size())
+            image().style.setProperty("image-rendering", "pixelated");
+         else
+            image().style.removeProperty("image-rendering");
 
          if (image().src)
             loaded_before = true;
@@ -71,7 +81,7 @@ const ImagePreview = (props) => {
          <div
             class={`${!alway_show() ? "fade-in" : ""} image-preview`}
          >
-            {image.loading && "loading..."}
+            {/* {image.loading && "loading..."} */}
             {image.error && "error!"}
          </div>
          {image()}
@@ -84,7 +94,7 @@ const ImagePreview = (props) => {
             onblur={() => set_hovering(false)}
             onfocus={() => set_hovering(true)}
          >
-            {props.filename}
+            {props.filename.split("__BS__").at(-1)}
          </a>
       </div>
    )
