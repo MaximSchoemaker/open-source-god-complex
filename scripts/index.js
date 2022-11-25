@@ -9,8 +9,8 @@ await Index();
 console.log("INDEXING DONE!")
 
 async function Index() {
-   // const index_path = "public\\compiled";
-   const index_path = "public\\archive";
+   const index_path = "public\\compiled";
+   // const index_path = "public\\archive";
    // const index_path = "public\\archive who dis";
 
    const meta_sizes = [

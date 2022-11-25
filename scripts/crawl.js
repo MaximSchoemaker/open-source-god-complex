@@ -3,7 +3,7 @@ import PATH from 'path';
 
 import { UUID } from "./utils.js";
 
-const LOG = true;
+const LOG = false;
 
 function shouldIgnore(path, ignore) {
    return ignore.some(ignore => path.includes(ignore));

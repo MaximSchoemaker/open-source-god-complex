@@ -58,7 +58,15 @@ async function Compile() {
    const mipmap_override = false;
 
    const compiled_mipmaps = await compileMipmaps(mipmap_path, mipmap_profile, mipmap_options, mipmap_sizes, mipmap_override);
-   compiled_mipmaps && console.log("count:", compiled_mipmaps.length);
+   if (compiled_mipmaps) {
+      const succeeded_items = compiled_mipmaps.filter(item => !item.error);
+      const failed_items = compiled_mipmaps.filter(item => item.error);
+      console.log("failed:", { items: failed_items.length });
+
+      const totalSize = succeeded_items.reduce((tot, i) => tot + i.metadata.size, 0);
+      console.log("succeeded:", { items: succeeded_items.length, size: formatBytes(totalSize) });
+   }
+   console.log("DONE!\n");
 
    // const metadata_path = "public\\compiled";
    // const metadata_profile = {};

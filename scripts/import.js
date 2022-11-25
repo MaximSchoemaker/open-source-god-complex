@@ -20,9 +20,14 @@ async function copyItem(source_path, target_path) {
 async function ffmpegItem(source_path, target_path, args) {
    const source_filename_with_extension = PATH.basename(source_path);
    const target_filename_with_extension = PATH.basename(target_path);
-   // LOG && console.log(">> ffmpeg:", source_filename_with_extension, "->", target_filename_with_extension);
-   await ffmpeg(args);
-   // LOG && console.log("<< ffmpeg:", source_filename_with_extension, "->", target_filename_with_extension);
+   LOG && console.log(">> ffmpeg", args.join(" "));
+   try {
+      await ffmpeg(args);
+   } catch {
+      return false;
+   }
+   LOG && console.log("<< ffmpeg:", source_filename_with_extension, "->", target_filename_with_extension);
+   return true;
 }
 
 async function metadataItem(source_path, target_path) {
@@ -38,20 +43,23 @@ async function executeAction(item, target_path, action) {
 
    await ensureDir(target_path);
 
-   switch (kind) {
-      case "copy":
-         await copyItem(item.path, target_path);
-         return true;
-      case "ffmpeg":
-         const { get_ffmpeg_args } = action;
-         const args = get_ffmpeg_args(item, target_path);
-         await ffmpegItem(item.path, target_path, args);
-         return true;
-      case "metadata":
-         const { get_source_path } = action;
-         const source_path = get_source_path(item);
-         await metadataItem(source_path, target_path);
-         return true;
+   try {
+      switch (kind) {
+         case "copy":
+            await copyItem(item.path, target_path);
+            return true;
+         case "ffmpeg":
+            const { get_ffmpeg_args } = action;
+            const args = get_ffmpeg_args(item, target_path);
+            return await ffmpegItem(item.path, target_path, args);
+         case "metadata":
+            const { get_source_path } = action;
+            const source_path = get_source_path(item);
+            await metadataItem(source_path, target_path);
+            return true;
+      }
+   } catch (e) {
+      console.error("error!", item.path, ">", target_path, "\n", ">", e);
    }
    return false;
 }
@@ -68,6 +76,7 @@ export default async function Import(actionQueue) {
       async (success, { item, target_path }, index, count) => {
          if (!success) {
             LOG && console.log("!! action failed", "(", index, "/", count, ")", "\n");
+            imported_items.push({ error: "action failed" });
             return;
          }
 
