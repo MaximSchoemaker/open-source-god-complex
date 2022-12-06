@@ -32,7 +32,8 @@ const ImagePreview = (props) => {
 
    createEffect(() => {
       const item_size = props.item_size();
-      let new_mipmap_index = props.mipmaps.findIndex(({ width, height }) => width >= item_size && height >= item_size);
+      let new_mipmap_index = props.mipmaps.reverse().findIndex(({ width, height }) => width >= item_size && height >= item_size);
+      // let new_mipmap_index = props.mipmaps.findIndex(({ width, height }) => width >= item_size && height >= item_size);
       new_mipmap_index = new_mipmap_index == -1 ? props.mipmaps.length - 1 : new_mipmap_index;
       set_mipmap_index(new_mipmap_index);
 
@@ -88,7 +89,7 @@ const ImagePreview = (props) => {
          <div class={`loading-animation ${loading() ? "active" : ""}`} />
          <a
             class={`image-preview-header ${hovering() ? "show" : ""} ${alway_show() ? "always-show" : ""}`}
-            style={{ top: (75 - props.item_y()) + "px" }}
+            style={{ top: `calc(var(--header-height) - ${props.item_y()}px` }}
             ref={a_ref}
             href={`/media/${props.id}`}
             onblur={() => set_hovering(false)}

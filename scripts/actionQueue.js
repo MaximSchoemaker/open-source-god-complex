@@ -1,6 +1,6 @@
 import { cpuUsage } from "./utils.js";
 
-const CPU_TARGET = 0.25;
+const CPU_TARGET = 1;
 const TIME_MAX = 10000;
 
 export default async function RunQueue(queue, executeAction, actionDone) {

@@ -1,9 +1,12 @@
 :root {
    --item-width: 512px;
    --gap: 2px;
-   --width: 50vw;
+   /* --width: 50vw; */
+   --width: 100%;
    --cols: 2;
    --size: calc(var(--width) / var(--cols) - var(--gap));
+   /* --header-height: 75px; */
+   --header-height: 0px;
 
    --color-text: white;
    --color-neutral: rgba(255, 255, 255, 0.25);
@@ -27,13 +30,14 @@ body {
    margin: 0;
    padding: var(--gap);
    /* background-color: red; */
+   background-color: black;
 }
 
 main {
    margin: 0 auto;
    width: var(--width);
    position: relative;
-   padding-top: 75px;
+   padding-top: var(--header-height);
 }
 
 #section {
@@ -68,6 +72,8 @@ h1 {
 }
 
 #header {
+   visibility: hidden;
+
    box-sizing: border-box;
    border-bottom: 1px solid var(--color-neutral);
 
@@ -82,7 +88,7 @@ h1 {
    z-index: 1;
 
    display: flex;
-   height: 75px;
+   height: var(--header-height);
    align-items: center;
    justify-content: space-around;
 

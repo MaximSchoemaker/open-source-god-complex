@@ -9,8 +9,8 @@ await Index();
 console.log("INDEXING DONE!")
 
 async function Index() {
-   const index_path = "public\\compiled";
-   // const index_path = "public\\archive";
+   // const index_path = "public\\compiled";
+   const index_path = "public\\archive";
    // const index_path = "public\\archive who dis";
 
    const meta_sizes = [
@@ -74,6 +74,7 @@ async function runIndex(path, meta_sizes) {
             const mipmap_path_src = mipmap_path.replace("public\\", "\\");
             return { width, height, src: mipmap_path_src };
          })
+            .concat({ width: 1080, height: 1080, src: item.src })
       )).filter(i => i != null);
 
       item.mipmaps = mipmaps;
